@@ -226,8 +226,10 @@ if 'selected_example' not in st.session_state:
 def set_example_image(example_index):
     path = f"sample/{example_index+1}.jpeg"
     if os.path.exists(path):
-        st.session_state.image = Image.open(path)
+        img = Image.open(path).convert("RGB")
+        st.session_state.image = img.copy()
         st.session_state.selected_example = example_index
+        st.session_state.last_uploaded_file = None  # Clear upload selection
 
     # Application title
 st.markdown("<h1 style='text-align: center; color: #0D47A1 !important;'>Diabetic Retinopathy Detection</h1>", unsafe_allow_html=True)
@@ -246,19 +248,20 @@ with col1:
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
     
     # Handle file upload
-    if uploaded_file is not None and (not hasattr(st.session_state, 'last_uploaded_file') or st.session_state.last_uploaded_file != uploaded_file.name):
+    if uploaded_file is not None:
+        # Always reload the image from the uploaded file to ensure it displays correctly
         try:
-            img = Image.open(uploaded_file)
-            st.session_state.image = img
+            img = Image.open(uploaded_file).convert("RGB")
+            # Create a copy to avoid issues with file buffer closing
+            st.session_state.image = img.copy()
             st.session_state.last_uploaded_file = uploaded_file.name
+            st.session_state.selected_example = None  # Clear example selection
         except Exception as e:
             st.error(f"Error loading image: {str(e)}")
     
     # Display the current input image
     if st.session_state.image is not None:
-        st.markdown("<div style='display: flex; justify-content: center;'>", unsafe_allow_html=True)
-        st.image(st.session_state.image, width=300, caption="Selected Image")
-        st.markdown("</div>", unsafe_allow_html=True)
+        st.image(st.session_state.image, width=300, caption="Selected Image", use_container_width=False)
     
     # Submit button
     if st.button("Analyze Image", use_container_width=True):
