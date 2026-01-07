@@ -18,5 +18,5 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8501
 
-# Command to run the Streamlit application
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Command to run the Streamlit application with proper settings for cloud deployment
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.enableCORS=false", "--server.enableXsrfProtection=false"]
