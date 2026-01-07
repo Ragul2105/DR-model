@@ -3,6 +3,7 @@ import onnxruntime
 import numpy as np
 from PIL import Image
 import os
+import io
 
 # Set light theme and page layout
 st.set_page_config(
@@ -249,13 +250,13 @@ with col1:
     
     # Handle file upload
     if uploaded_file is not None:
-        # Always reload the image from the uploaded file to ensure it displays correctly
         try:
-            img = Image.open(uploaded_file).convert("RGB")
-            # Create a copy to avoid issues with file buffer closing
-            st.session_state.image = img.copy()
+            # Read file bytes and create image from bytes (more reliable on cloud)
+            bytes_data = uploaded_file.getvalue()
+            img = Image.open(io.BytesIO(bytes_data)).convert("RGB")
+            st.session_state.image = img
             st.session_state.last_uploaded_file = uploaded_file.name
-            st.session_state.selected_example = None  # Clear example selection
+            st.session_state.selected_example = None
         except Exception as e:
             st.error(f"Error loading image: {str(e)}")
     
